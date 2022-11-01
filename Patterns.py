@@ -1,16 +1,25 @@
+from metrics import *
+from stock_history import Ticker
 
-class Patterns():
+class Patterns(Ticker):
 
-    def __init__(self, data) -> None:
-        
-        self.data = data
+    def __init__(self, ticker) -> None:
+        Ticker.__init__(self, ticker)
+        self.getHistory()        
+        self.calculator = Metrics()
 
+    def flagType(self):
+        self.data["Type"] = [1 if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else 0 for i in range(len(self.data))]
     
-    def longFlag(self):
-        pass
+    def longFlag(self, x = 20, alpha = 2):
+        #   Calculate ATR(x)
+        atr = self.calculator.calculateATR(self.data, x)
+        self.data["LongFlag"] = [True if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) >= alpha*atr else False for i in range(len(self.data))]
 
-    def shortFlag(self):
-        pass
+    def shortFlag(self, x = 20, alpha = 0.5):
+        #   Calculate ATR(x)
+        atr = self.calculator.calculateATR(self.data, x)
+        self.data["LongFlag"] = [True if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) <= alpha*atr[i] else False for i in range(len(self.data))]
 
     def marubozuFlag(self):
         pass
