@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\Alishan\Desktop\Python Projects\Candle Pattern Analysis\venv
+set VIRTUAL_ENV=C:\Users\Alishan\Desktop\Python Projects\Candle Pattern Analysis\CandlePatterns\venv
 
 if not defined PROMPT set PROMPT=$P$G
 

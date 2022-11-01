@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Alishan\Desktop\Python Projects\Candle Pattern Analysis\venv"
+VIRTUAL_ENV="C:\Users\Alishan\Desktop\Python Projects\Candle Pattern Analysis\CandlePatterns\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
