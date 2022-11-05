@@ -10,7 +10,7 @@ class Patterns(Ticker):
         self.calculator = Metrics()
 
     def flagType(self):
-        self.data["Type"] = [1 if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else 0 for i in range(len(self.data))]
+        self.data["Type"] = [1 if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else -1 for i in range(len(self.data))]
     
     def longFlag(self, n = 20, alpha = 2):
         #   Calculate ATR(x)
@@ -22,23 +22,64 @@ class Patterns(Ticker):
         atr = self.calculator.calculateATR(self.data, n)
         self.data["ShortFlag"] = [1 if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) <= alpha*atr[i] else 0 for i in range(len(self.data))]
 
-    def marubozuFlag(self, alpha = 2, n = 20):
+    def marubozuFlag(self, alpha = 1.5, n = 20):
+        flag_type = [True if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else False for i in range(len(self.data))]
         atr = self.calculator.calculateATR(self.data, n)
         long = [True if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) >= alpha*atr[i] else False for i in range(len(self.data))]
         max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
         min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
         upper_shadow = [max_body[i]/self.data.loc[i, "High"] for i in range(len(self.data))]
         lower_shadow = [min_body[i]/self.data.loc[i, "Low"]  for i in range(len(self.data))]
-        no_upper_shadow = [True if x >= 0.95 else False for x in upper_shadow]
-        no_lower_shadow = [True if x <= 1.05 else False for x in lower_shadow]
+        no_upper_shadow = [True if x >= 0.98 else False for x in upper_shadow]
+        no_lower_shadow = [True if x <= 1.02 else False for x in lower_shadow]
         self.data["MarubozuFlag"] = [1 if no_upper_shadow[i] and no_lower_shadow[i] and long[i] else 0 for i in range(len(self.data))]
 
+        for i in range(len(self.data)):
+            if long[i] and no_upper_shadow[i] and flag_type[i] and no_lower_shadow[i]:
+                self.data.loc[i, "MarubozuFlag"] = 1
+            elif long[i] and no_upper_shadow[i] and not flag_type[i] and no_lower_shadow[i]:
+                self.data.loc[i, "MarubozuFlag"] = -1
+            else:
+                self.data.loc[i, "MarubozuFlag"] = 0
 
-    def closingMarubozuFlag(self):
-        pass
+    def closingMarubozuFlag(self, alpha = 1.5, n = 20):
+        flag_type = [True if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else False for i in range(len(self.data))]
+        atr = self.calculator.calculateATR(self.data, n)
+        long = [True if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) >= alpha*atr[i] else False for i in range(len(self.data))]
+        max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
+        min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
+        upper_shadow = [max_body[i]/self.data.loc[i, "High"] for i in range(len(self.data))]
+        lower_shadow = [min_body[i]/self.data.loc[i, "Low"]  for i in range(len(self.data))]
+        no_upper_shadow = [True if x >= 0.98 else False for x in upper_shadow]
+        no_lower_shadow = [True if x <= 1.02 else False for x in lower_shadow]
 
-    def openingMarubozuFlag(self):
-        pass
+        for i in range(len(self.data)):
+            if long[i] and no_upper_shadow[i] and flag_type[i] and not no_lower_shadow[i]:
+                self.data.loc[i, "ClosingMarubozuFlag"] = 1
+            elif long[i] and no_lower_shadow[i] and not flag_type[i] and not no_upper_shadow[i]:
+                self.data.loc[i, "ClosingMarubozuFlag"] = -1
+            else:
+                self.data.loc[i, "ClosingMarubozuFlag"] = 0
+
+
+    def openingMarubozuFlag(self, alpha = 1.5, n = 20):
+        flag_type = [True if self.data.loc[i, "Close"] >= self.data.loc[i, "Open"] else False for i in range(len(self.data))]
+        atr = self.calculator.calculateATR(self.data, n)
+        long = [True if abs(self.data.loc[i, "Close"]-self.data.loc[i, "Open"]) >= alpha*atr[i] else False for i in range(len(self.data))]
+        max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
+        min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
+        upper_shadow = [max_body[i]/self.data.loc[i, "High"] for i in range(len(self.data))]
+        lower_shadow = [min_body[i]/self.data.loc[i, "Low"]  for i in range(len(self.data))]
+        no_upper_shadow = [True if x >= 0.98 else False for x in upper_shadow]
+        no_lower_shadow = [True if x <= 1.02 else False for x in lower_shadow]
+
+        for i in range(len(self.data)):
+            if long[i] and no_lower_shadow[i] and flag_type[i] and not no_upper_shadow[i]:
+                self.data.loc[i, "OpeningMarubozuFlag"] = 1
+            elif long[i] and no_upper_shadow[i] and not flag_type[i] and not no_lower_shadow[i]:
+                self.data.loc[i, "OpeningMarubozuFlag"] = -1
+            else:
+                self.data.loc[i, "OpeningMarubozuFlag"] = 0
 
     def spinningTopFlag(self):
         pass

@@ -13,7 +13,7 @@ class Ticker():
     
     def getHistory(self):
 
-        self.data = self.sym.history(period = self.period, interval = self.interval, actions = False)
+        self.data = self.sym.history(period = self.period, interval = self.interval, actions = True)
         self.data.sort_index(inplace = True)
         self.data.reset_index(inplace = True)
 
