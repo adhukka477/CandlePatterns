@@ -82,7 +82,19 @@ class Patterns(Ticker):
                 self.data.loc[i, "OpeningMarubozuFlag"] = 0
 
     def spinningTopFlag(self):
-        pass
+        max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
+        min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
+        upper_shadow = [max_body[i]/self.data.loc[i, "High"] for i in range(len(self.data))]
+        lower_shadow = [min_body[i]/self.data.loc[i, "Low"]  for i in range(len(self.data))]
+
+        shadow_ratio = [(upper_shadow[i] - max_body[i])/(min_body[i] - lower_shadow[i]) for i in range(len(self.data))]
+        body_shadow_ratio = [(max_body[i] - min_body[i])/(upper_shadow[i] - lower_shadow[i]) for i in range(len(self.data))]
+
+        for i in range(len(self.data)):
+            if body_shadow_ratio[i] <= 0.50 and shadow_ratio[i] <= 1.10 and shadow_ratio[i] >= 0.90:
+                self.data.loc[i, "SpinningTop"] = 1
+            else:
+                self.data.loc[i, "SpinningTop"] = 0
 
     def dojiFlag(self):
         pass
