@@ -1,4 +1,6 @@
 {
     "git.ignoreLimitWarning": true,
-    "notebook.output.textLineLimit": 100
+    "notebook.output.textLineLimit": 100,
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.typeCheckingMode": "off"
 }
