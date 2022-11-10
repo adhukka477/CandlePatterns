@@ -124,22 +124,39 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "BearishOpeningMarubozuFlag"] = 0
 
+    def SpinningTopFlag(self):
+        max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
+        min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
+        upper_shadow = [self.data.loc[i, "High"] - max_body[i] for i in range(len(self.data))]
+        lower_shadow = [min_body[i] - self.data.loc[i, "Low"]  for i in range(len(self.data))]
+        body_size = [max_body[i] - min_body[i] for i in range(len(self.data))]
+        shadow_ratio = [(self.data.loc[i, "High"] - max_body[i])/(min_body[i] - self.data.loc[i, "Low"]) for i in range(len(self.data))]
+        body_shadow_ratio = [body_size/(self.data.loc[i, "High"] - self.data.loc[i, "Low"]) for i in range(len(self.data))]
+
+        for i in range(len(self.data)):
+            try:
+                if (body_shadow_ratio[i] > 0.05 & 
+                    shadow_ratio[i] <= 1.25 & 
+                    shadow_ratio[i] >= 0.75 & 
+                    upper_shadow[i] >= 2*body_size[i] &
+                    lower_shadow[i] >= 2*body_size[i]):
+                    self.data.loc[i, "SpinningTopFlag"] = 1
+                else:
+                    self.data.loc[i, "SpinningTopFlag"] = 0
+            except:
+                self.data.loc[i, "SpinningTopFlag"] = 0
+
     def dojiFlag(self):
         max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
         min_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]        
-        upper_shadow = [max_body[i]/self.data.loc[i, "High"] for i in range(len(self.data))]
-        lower_shadow = [min_body[i]/self.data.loc[i, "Low"]  for i in range(len(self.data))]
-        shadow_ratio = [(upper_shadow[i] - max_body[i])/(min_body[i] - lower_shadow[i]) for i in range(len(self.data))]
-        body_shadow_ratio = [(max_body[i] - min_body[i])/(upper_shadow[i] - lower_shadow[i]) for i in range(len(self.data))]
+        shadow_ratio = [(self.data.loc[i, "High"] - max_body[i])/(min_body[i] - self.data.loc[i, "Low"]) for i in range(len(self.data))]
+        body_shadow_ratio = [(max_body[i] - min_body[i])/(self.data.loc[i, "High"] - self.data.loc[i, "Low"]) for i in range(len(self.data))]
 
         for i in range(len(self.data)):
-            if body_shadow_ratio[i] <= 0.10 and shadow_ratio[i] <= 1.25 and shadow_ratio[i] >= 0.75:
+            if body_shadow_ratio[i] <= 0.05 and shadow_ratio[i] <= 1.25 and shadow_ratio[i] >= 0.75:
                 self.data.loc[i, "DojiFlag"] = 1
             else:
                 self.data.loc[i, "DojiFlag"] = 0
-
-    def SpinningTop(self):
-        pass
 
     def longLeggedDojiFlag(self):
         pass
