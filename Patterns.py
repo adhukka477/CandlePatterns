@@ -158,7 +158,7 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "DojiFlag"] = 0
 
-    def longLeggedDojiFlag(self, n = 20, alpha = 3):
+    def longLeggedDojiFlag(self, n = 20, alpha = 1):
         atr = self.calculator.calculateATR(self.data, n)
         long_range = [True if self.data.loc[i, "High"]-self.data.loc[i, "Low"] >= alpha*atr[i] else False for i in range(len(self.data))]
         max_body = [self.data.loc[i, "Open"] if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"] else self.data.loc[i, "Close"] for i in range(len(self.data))]
@@ -169,15 +169,15 @@ class Patterns(Ticker):
         bool_shadow_ratio = [True if x <= 1.25 and x >=0.75 else False for x in shadow_ratio]
 
         for i in range(len(self.data)):
-            try:
-                if bool_body_shadow_ratio and bool_shadow_ratio and long_range:
-                    self.data.loc[i, "LongLeggedDojiFlag"] = 1
-                else:
-                    self.data.loc[i, "LongLeggedDojiFlag"] = 0
-            except:
+            if bool_body_shadow_ratio[i] and bool_shadow_ratio[i] and long_range[i]:
+                self.data.loc[i, "LongLeggedDojiFlag"] = 1
+            else:
                 self.data.loc[i, "LongLeggedDojiFlag"] = 0
 
         self.data["atr"] = atr
+        self.data["long_range"] = long_range
+        self.data["body_shadow_ratio"] = bool_body_shadow_ratio
+        self.data["shadow_ratio"] = bool_shadow_ratio
         
 
 
