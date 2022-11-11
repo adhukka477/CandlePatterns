@@ -1,2 +1,4 @@
 check.csv
 .env/
+__pycache__/
+

@@ -2,9 +2,11 @@ import ta
 
 class Metrics():
 
-    def __init__(self):
-        pass
 
+    def calculatePctChange(self, data, n):
+        chg = data.Close.pct_change(n)
+
+        return chg.fillna(0)
 
     def calculateATR(self, data, x):
         # Calculate atr and backfill prior data with last known atr(x)
