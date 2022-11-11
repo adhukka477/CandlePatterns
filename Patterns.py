@@ -395,7 +395,7 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "InvertedCrossDojiFlag"] = 0
 
-    def hammerFlag(self, n=50, alpha=1.5):
+    def hammerFlag(self, n=20, alpha=1.5):
         atr = self.calculator.calculateATR(self.data, n)
         long_range = [
             True if self.data.loc[i, "High"] - self.data.loc[i, "Low"] >= alpha * atr[i] else False
@@ -432,7 +432,7 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "HammerFlag"] = 0
 
-    def hangingManFlag(self, n=50, alpha=1.5):
+    def hangingManFlag(self, n=20, alpha=1.5):
         atr = self.calculator.calculateATR(self.data, n)
         long_range = [
             True if self.data.loc[i, "High"] - self.data.loc[i, "Low"] >= alpha * atr[i] else False
@@ -469,8 +469,79 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "HangingManFlag"] = 0
 
-    def shootingStarFlag(self):
-        pass
+    def invertedHammerFlag(self, n=20, alpha=1.5):
+        atr = self.calculator.calculateATR(self.data, n)
+        long_range = [
+            True if self.data.loc[i, "High"] - self.data.loc[i, "Low"] >= alpha * atr[i] else False
+            for i in range(len(self.data))
+        ]
+        max_body = [
+            self.data.loc[i, "Open"]
+            if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"]
+            else self.data.loc[i, "Close"]
+            for i in range(len(self.data))
+        ]
+        min_body = [
+            self.data.loc[i, "Open"]
+            if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"]
+            else self.data.loc[i, "Close"]
+            for i in range(len(self.data))
+        ]
+        shadow_ratio = [
+            (self.data.loc[i, "High"] - max_body[i]) / (min_body[i] - self.data.loc[i, "Low"])
+            for i in range(len(self.data))
+        ]
+        body_shadow_ratio = [
+            (max_body[i] - min_body[i]) / (self.data.loc[i, "High"] - self.data.loc[i, "Low"])
+            for i in range(len(self.data))
+        ]
+        bool_body_shadow_ratio = [True if x <= 0.10 else False for x in body_shadow_ratio]
+        bool_shadow_ratio = [True if x <= 1.75 else False for x in shadow_ratio]
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        bool_trend = [True if x <= 0 else False for x in trend_n]
+
+        for i in range(len(self.data)):
+            if bool_body_shadow_ratio[i] and bool_shadow_ratio[i] and long_range[i] and bool_trend[i]:
+                self.data.loc[i, "InvertedHammerFlag"] = 1
+            else:
+                self.data.loc[i, "InvertedHammerFlag"] = 0
+    
+    def shootingStarFlag(self, n=20, alpha=1.5):
+        atr = self.calculator.calculateATR(self.data, n)
+        long_range = [
+            True if self.data.loc[i, "High"] - self.data.loc[i, "Low"] >= alpha * atr[i] else False
+            for i in range(len(self.data))
+        ]
+        max_body = [
+            self.data.loc[i, "Open"]
+            if self.data.loc[i, "Open"] >= self.data.loc[i, "Close"]
+            else self.data.loc[i, "Close"]
+            for i in range(len(self.data))
+        ]
+        min_body = [
+            self.data.loc[i, "Open"]
+            if self.data.loc[i, "Open"] <= self.data.loc[i, "Close"]
+            else self.data.loc[i, "Close"]
+            for i in range(len(self.data))
+        ]
+        shadow_ratio = [
+            (self.data.loc[i, "High"] - max_body[i]) / (min_body[i] - self.data.loc[i, "Low"])
+            for i in range(len(self.data))
+        ]
+        body_shadow_ratio = [
+            (max_body[i] - min_body[i]) / (self.data.loc[i, "High"] - self.data.loc[i, "Low"])
+            for i in range(len(self.data))
+        ]
+        bool_body_shadow_ratio = [True if x <= 0.10 else False for x in body_shadow_ratio]
+        bool_shadow_ratio = [True if x <= 1.75 else False for x in shadow_ratio]
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        bool_trend = [True if x > 0 else False for x in trend_n]
+
+        for i in range(len(self.data)):
+            if bool_body_shadow_ratio[i] and bool_shadow_ratio[i] and long_range[i] and bool_trend[i]:
+                self.data.loc[i, "ShootingStarFlag"] = -1
+            else:
+                self.data.loc[i, "ShootingStarFlag"] = 0
 
     def engulfingFlag(self):
         pass

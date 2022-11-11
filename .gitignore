@@ -1,4 +1,4 @@
 check.csv
-.env/
-__pycache__/
+.env*
+__pycache__*
 
