@@ -543,8 +543,41 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "ShootingStarFlag"] = 0
 
-    def engulfingFlag(self):
-        pass
+    def bullishEngulfingFlag(self, n=20):
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        trend = [True if x < 0 else False for x in trend_n]
+        prior_candle_red = [False] + [True if self.data.loc[i-1, "Close"] < self.data.loc[i-1, "Open"] else False for i in range(1,len(self.data),1)]
+        current_candle_green = [False] + [True if self.data.loc[i, "Close"] > self.data.loc[i, "Open"] else False for i in range(1,len(self.data),1)]
+        body_engulfed = [False] + [True if (self.data.loc[i, "Close"] > self.data.loc[i-1, "Close"] and 
+                                            self.data.loc[i, "Open"] < self.data.loc[i-1, "Open"])
+                                        else False for i in range(1,len(self.data),1)]
+        shadows_engulfed = [False] + [True if (self.data.loc[i, "High"] > self.data.loc[i-1, "High"] and
+                                                self.data.loc[i, "Low"] < self.data.loc[i-1, "Low"])
+                                            else False for i in range(1,len(self.data),1)]
+        
+        for i in range(len(self.data)):
+            if prior_candle_red[i] and current_candle_green[i] and body_engulfed[i] and shadows_engulfed[i] and trend[i]:
+                self.data.loc[i, "BullishEngulfingFlag"] = 1
+            else:
+                self.data.loc[i, "BullishEngulfingFlag"] = 0
+          
+    def bearishEngulfingFlag(self, n=20):
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        trend = [True if x > 0 else False for x in trend_n]
+        prior_candle_green = [False] + [True if self.data.loc[i-1, "Open"] < self.data.loc[i-1, "Close"] else False for i in range(1,len(self.data),1)]
+        current_candle_red = [False] + [True if self.data.loc[i, "Open"] > self.data.loc[i, "Close"] else False for i in range(1,len(self.data),1)]
+        body_engulfed = [False] + [True if (self.data.loc[i, "Open"] > self.data.loc[i-1, "Close"] and 
+                                            self.data.loc[i, "Close"] < self.data.loc[i-1, "Open"])
+                                        else False for i in range(1,len(self.data),1)]
+        shadows_engulfed = [False] + [True if (self.data.loc[i, "High"] > self.data.loc[i-1, "High"] and
+                                                self.data.loc[i, "Low"] < self.data.loc[i-1, "Low"])
+                                            else False for i in range(1,len(self.data),1)]
+        
+        for i in range(len(self.data)):
+            if prior_candle_green[i] and current_candle_red[i] and body_engulfed[i] and shadows_engulfed[i] and trend[i]:
+                self.data.loc[i, "BearishEngulfingFlag"] = -1
+            else:
+                self.data.loc[i, "BearishEngulfingFlag"] = 0
 
     def piercingFlag(self):
         pass
