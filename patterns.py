@@ -614,9 +614,50 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "DarkCloudFlag"] = 0
 
-    def haramiFlag(self):
-        pass
+    def bullishHaramiFlag(self, n=20, alpha = 0.50):
+        atr = self.calculator.calculateATR(self.data, n)
+        short_flag = [
+            1 if abs(self.data.loc[i, "High"] - self.data.loc[i, "Low"]) <= alpha * atr[i] else 0
+            for i in range(len(self.data))
+        ]
+        body_ratio = [False] + [True if abs(self.data.loc[i, "Open"] - self.data.loc[i, "Close"])/abs(self.data.loc[i-1, "Open"] - self.data.loc[i-1, "Close"]) <= 0.25 
+                                     else False for i in range(1,len(self.data), 1)]
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        trend = [True if x < 0 else False for x in trend_n]
+        prior_candle_red = [False] + [True if self.data.loc[i-1, "Close"] < self.data.loc[i-1, "Open"] else False for i in range(1,len(self.data),1)]
+        current_candle_green = [False] + [True if self.data.loc[i, "Close"] > self.data.loc[i, "Open"] else False for i in range(1,len(self.data),1)]
+        shadows_engulfed = [False] + [True if (self.data.loc[i, "High"] < self.data.loc[i-1, "Open"] and
+                                                self.data.loc[i, "Low"] > self.data.loc[i-1, "Close"])
+                                            else False for i in range(1,len(self.data),1)]
+        
+        for i in range(len(self.data)):
+            if prior_candle_red[i] and current_candle_green[i] and short_flag[i] and shadows_engulfed[i] and trend[i] and body_ratio[i]:
+                self.data.loc[i, "BullishHaramiFlag"] = 1
+            else:
+                self.data.loc[i, "BullishHaramiFlag"] = 0
 
+    def bearishHaramiFlag(self, n=20, alpha = 0.50):
+        atr = self.calculator.calculateATR(self.data, n)
+        short_flag = [
+            1 if abs(self.data.loc[i, "Close"] - self.data.loc[i, "Open"]) <= alpha * atr[i] else 0
+            for i in range(len(self.data))
+        ]
+        body_ratio = [False] + [True if abs(self.data.loc[i, "Open"] - self.data.loc[i, "Close"])/abs(self.data.loc[i-1, "Open"] - self.data.loc[i-1, "Close"]) <= 0.25 
+                                else False for i in range(1,len(self.data), 1)]
+        trend_n = self.calculator.calculatePctChange(self.data, n)
+        trend = [True if x > 0 else False for x in trend_n]
+        prior_candle_green = [False] + [True if self.data.loc[i-1, "Close"] > self.data.loc[i-1, "Open"] else False for i in range(1,len(self.data),1)]
+        current_candle_red = [False] + [True if self.data.loc[i, "Close"] < self.data.loc[i, "Open"] else False for i in range(1,len(self.data),1)]
+        shadows_engulfed = [False] + [True if (self.data.loc[i, "High"] < self.data.loc[i-1, "Close"] and
+                                                self.data.loc[i, "Low"] > self.data.loc[i-1, "Open"])
+                                            else False for i in range(1,len(self.data),1)]
+        
+        for i in range(len(self.data)):
+            if prior_candle_green[i] and current_candle_red[i] and short_flag[i] and shadows_engulfed[i] and trend[i] and body_ratio[i]:
+                self.data.loc[i, "BearishHaramiFlag"] = -1
+            else:
+                self.data.loc[i, "BearishHaramiFlag"] = 0
+        
     def kickerFlag(self):
         pass
 
