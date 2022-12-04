@@ -658,7 +658,10 @@ class Patterns(Ticker):
             else:
                 self.data.loc[i, "BearishHaramiFlag"] = 0
         
-    def kickerFlag(self):
+    def bullishFickerFlag(self):
+        pass
+
+    def bearishKickerFlag(self):
         pass
 
     def morningStarFlag(self):

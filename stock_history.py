@@ -7,7 +7,7 @@ class Ticker:
         self.ticker = ticker
         self.sym = yf.Ticker(self.ticker)
         self.period = "max"
-        self.interval = "1d"
+        self.interval = "1mo"
         self.data = None
 
     def getHistory(self):
